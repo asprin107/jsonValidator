@@ -1,3 +1,4 @@
+import domain.JsonReport;
 import json.JsonValidator;
 import json.Validator;
 import org.junit.Test;
@@ -33,9 +34,11 @@ public class TestJsonValidator {
 
         Validator jsonValidator = new JsonValidator();
         jsonValidator.setMetadata();
-
+        JsonReport report = new JsonReport();
         for(File file : reader.getFiles()) {
-            jsonValidator.check(file);
+            report.addReport(jsonValidator.check(file, report));
         }
+
+        System.out.println(report);
     }
 }

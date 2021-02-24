@@ -15,4 +15,20 @@ public class JsonReport {
         this.invalidFiles = new ArrayList<>();
         this.errMsg = new ArrayList<>();
     }
+
+    public JsonReport addReport(JsonReport report) {
+        validFiles.addAll(report.validFiles);
+        invalidFiles.addAll(report.invalidFiles);
+        errMsg.addAll(report.errMsg);
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "JsonReport{" +
+                "validFiles=" + validFiles +
+                ", invalidFiles=" + invalidFiles +
+                ", errMsg=" + errMsg +
+                '}';
+    }
 }

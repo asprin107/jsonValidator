@@ -2,18 +2,23 @@ package json;
 
 import domain.JsonMetadata;
 import domain.JsonReport;
+import exception.JsonValidationException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import reader.JsonReader;
 import reader.Reader;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.rmi.UnexpectedException;
+import java.util.Arrays;
 
 public class JsonValidator implements Validator {
 
     public JsonMetadata metadata;
+    public String[] notKey = {"type", "items", "enum"};
+    public String propertyKey = "properties";
 
     @Override
     public boolean setMetadata() {
@@ -43,67 +48,126 @@ public class JsonValidator implements Validator {
     }
 
     @Override
-    public JsonReport check(File file) throws IOException {
-//        JSONObject propertiesObj = metadata.data.getJSONObject("properties");
+    public JsonReport check(File file, JsonReport report) throws IOException {
         JSONObject targetObj = new JsonReader().getJsonObjFromFile(file);
-//        for(String key : propertiesObj.keySet()) {
-//            System.out.println(key);
-//            System.out.println(checkType(propertiesObj.getJSONObject(key), targetObj.get(key)));
-//        }
-        return checkAllKeys(file.getName(), metadata.data.getJSONObject("properties"), targetObj, new JsonReport());
+        return checkAllKeysInit(file.getName(), metadata.data, targetObj, report);
     }
 
-    private JsonReport checkAllKeys(String fileName, JSONObject metaJson, JSONObject targetJson, JsonReport report) {
-        JsonReport rsltReport = new JsonReport();
+    private JsonReport checkAllKeysInit(String fileName, JSONObject metaJson, JSONObject targetJson, JsonReport report) {
+        JsonReport rsltReport = report;
         try {
-            rsltReport = checkAllKeys(metaJson, targetJson, report);
-            report.validFiles.add(fileName);
+            rsltReport.addReport(checkAllKeys(metaJson, targetJson, report));
+            rsltReport.validFiles.add(fileName);
         } catch (UnexpectedException ue) {
-            report.invalidFiles.add(fileName);
+            rsltReport.invalidFiles.add(fileName);
+        } catch (JsonValidationException jve) {
+            rsltReport.invalidFiles.add(fileName);
+            int lastErrMsgAdded = report.errMsg.size()-1;
+            rsltReport.errMsg.set(lastErrMsgAdded, report.errMsg.get(lastErrMsgAdded).setFileName(fileName));
         }
         return rsltReport;
     }
-    private JsonReport checkAllKeys(JSONObject metaJson, JSONObject targetJson, JsonReport report) throws UnexpectedException {
-        boolean flag = false;
+
+    private JsonReport checkAllKeys(JSONObject metaJson, Object targetJson, JsonReport report) throws UnexpectedException, JsonValidationException {
+        JsonReport rsltReport = report;
         for(String key : metaJson.keySet()) {
-            checkType(key, metaJson.getJSONObject(key), targetJson.get(key), report);
+            switch (key) {
+                case"enum": break; // value Chk
+                case"items": break; // array type Chk
+                case"type": break; // type Chk
+                case"title": case"description": break;// do nothing
+                case "properties":
+                    rsltReport.addReport(checkAllKeys(metaJson.getJSONObject(propertyKey), targetJson, report));
+                    break;
+                default:
+                    // general keys
+                    if(targetJson instanceof JSONObject) {
+                        if(((JSONObject)targetJson).has(key)) {
+                            rsltReport.addReport(checkType(key, metaJson.getJSONObject(key), ((JSONObject)targetJson).get(key), report));
+                        } else {
+                            // 해당 키는 optional 일 가능성 있음. 구문적합성 검사에 의해 skip 하고 정상처리.
+                        }
+                    } else if (targetJson instanceof JSONArray) {
+                        rsltReport.addReport(checkType(key, metaJson.getJSONObject(key), targetJson, report));
+                    }
+                    break;
+            }
         }
-        return report;
+        return rsltReport;
     }
 
-    private boolean checkType(String key, JSONObject metaJson, Object targetJsonValue, JsonReport report) throws UnexpectedException {
-        boolean flag = false;
+    private JsonReport checkType(String key, JSONObject metaJson, Object targetJsonValue, JsonReport report) throws UnexpectedException, JsonValidationException {
+        String typeErrMsg = "[" + key + "] 키에서 타입 불일치.";
+        String undefinedErrMsg = "정의되지 않은 타입이 메타데이터에 포함됨.";
+
+        JsonReport rsltReport = report;
+
         switch (metaJson.getString("type")) {
             case "string":
                 if(targetJsonValue instanceof String) {
-                    flag = true;
+                    rsltReport.addReport(checkValue(key, metaJson, targetJsonValue, report));
                     break;
                 } else {
-                    // err msg 추가하고
-//                    report.errMsg.add(key + "에서 타입 불일치.");
+                    rsltReport.errMsg.add(new JsonInvalidErrMsg(typeErrMsg));
+                    throw new JsonValidationException(typeErrMsg);
                 }
-            case "number": if(targetJsonValue instanceof Integer) flag = true; break;
+
+            case "number": if(targetJsonValue instanceof Integer) {
+                rsltReport.addReport(checkValue(key, metaJson, targetJsonValue, report));
+                break;
+            } else {
+                rsltReport.errMsg.add(new JsonInvalidErrMsg(typeErrMsg));
+                throw new JsonValidationException(typeErrMsg);
+            }
+
             case "object":
                 if(targetJsonValue instanceof JSONObject) {
-                    checkAllKeys(metaJson, (JSONObject) targetJsonValue, report);
-                } else {
-                    flag = true;
+                    rsltReport.addReport(checkAllKeys(metaJson, targetJsonValue, report));
                     break;
+                } else {
+                    rsltReport.errMsg.add(new JsonInvalidErrMsg(typeErrMsg));
+                    throw new JsonValidationException(typeErrMsg);
                 }
+
             case "array":
                 if(targetJsonValue instanceof JSONArray) {
                     JSONArray jsonArr = (JSONArray) targetJsonValue;
                     for(int i=0 ; i<jsonArr.length() ; i++) {
-                        checkAllKeys(metaJson, jsonArr.getJSONObject(i), report);
+                        rsltReport.addReport(checkAllKeys(metaJson.getJSONObject("items"), ((JSONArray)targetJsonValue).get(i), report));
                     }
-                } else {
-                    flag = true;
                     break;
+                } else {
+                    rsltReport.errMsg.add(new JsonInvalidErrMsg(typeErrMsg));
+                    throw new JsonValidationException(typeErrMsg);
                 }
+
             default:
-                throw new UnexpectedException("정의되지 않은 타입이 메타데이터에 포함됨.");
+                throw new UnexpectedException(undefinedErrMsg);
         }
-        return flag;
+
+        return report;
+    }
+
+    private JsonReport checkValue(String key, JSONObject metaJson, Object targetJson, JsonReport report) {
+        String valErrMsg = "[" + key + "] 키에서 허용되지 않은 값 사용됨.";
+        JsonReport rsltReport = report;
+
+        if(metaJson.has("enum") && !enumChk(metaJson.getJSONArray("enum"), targetJson)) {
+            // 에러 보고
+            JsonReport errReport = new JsonReport();
+            errReport.errMsg.add(new JsonInvalidErrMsg(valErrMsg));
+            rsltReport.addReport(errReport);
+        }
+
+        return rsltReport;
+    }
+
+    private boolean enumChk(JSONArray enumList, Object value) {
+        Object[] availableValueList = new Object[enumList.length()];
+        for(int i=0 ; i < enumList.length() ; i++) {
+            availableValueList[i] = enumList.get(i);
+        }
+        return Arrays.asList(availableValueList).contains(value);
     }
 
 }
