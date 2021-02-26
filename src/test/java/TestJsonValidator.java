@@ -4,6 +4,7 @@ import json.Validator;
 import org.junit.Test;
 import reader.JsonReader;
 import reader.Reader;
+import report.Writer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -35,10 +36,23 @@ public class TestJsonValidator {
         Validator jsonValidator = new JsonValidator();
         jsonValidator.setMetadata();
         JsonReport report = new JsonReport();
-        for(File file : reader.getFiles()) {
-            report.addReport(jsonValidator.check(file, report));
+        int totFiles = reader.getFiles().length;
+
+        for(int i=0 ; i<totFiles ; i++) {
+            File currFile = reader.getFiles()[i];
+            // print progress
+            printCurrentProgress(i+1, currFile.getName(), totFiles);
+            // run test
+            jsonValidator.check(currFile, report);
         }
 
+        Writer writer = new Writer();
+        writer.write(report);
+
         System.out.println(report);
+    }
+
+    private void printCurrentProgress(int currNum, String currFile, int totFiles) throws IOException {
+        System.out.println("In progress : " + +currNum + "/" + totFiles + " : " + currFile);
     }
 }

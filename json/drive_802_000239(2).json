@@ -1,0 +1,186 @@
+{
+    "IMAGE_INFO": {
+        "CAMERA_NAME": "front",
+        "IMAGE_WIDTH": 1920,
+        "IMAGE_HEIGHT": 1200,
+        "IMAGE_PATH": "\\drive_802\\image_0\\drive_802_000239.jpg"
+    },
+    "OBJECT_LIST": [
+        {
+            "2D_LIST": [
+                {
+                    "POLYGON": [
+                        0,
+                        616,
+                        907,
+                        573,
+                        945,
+                        570,
+                        904,
+                        584,
+                        610,
+                        635,
+                        0,
+                        735
+                    ],
+                    "CLASS": "curb"
+                },
+                {
+                    "POLYGON": [
+                        1920,
+                        756,
+                        1104,
+                        583,
+                        1920,
+                        776
+                    ],
+                    "CLASS": "curb"
+                },
+                {
+                    "POLYGON": [
+                        0,
+                        755,
+                        333,
+                        697,
+                        770,
+                        611
+                    ],
+                    "COLOR": "WHITE",
+                    "COUNT": "1",
+                    "CLASS": "LANE",
+                    "TYPE": "SOLID"
+                },
+                {
+                    "POLYGON": [
+                        0,
+                        887,
+                        550,
+                        708,
+                        789,
+                        636
+                    ],
+                    "COLOR": "WHITE",
+                    "COUNT": "1",
+                    "CLASS": "LANE",
+                    "TYPE": "DASHED"
+                },
+                {
+                    "POLYGON": [
+                        635,
+                        903,
+                        670,
+                        910,
+                        970,
+                        589
+                    ],
+                    "COLOR": "WHITE",
+                    "COUNT": "1",
+                    "CLASS": "LANE",
+                    "TYPE": "DASHED"
+                },
+                {
+                    "POLYGON": [
+                        1384,
+                        957,
+                        1412,
+                        955,
+                        1035,
+                        603
+                    ],
+                    "COLOR": "WHITE",
+                    "COUNT": "1",
+                    "CLASS": "LANE",
+                    "TYPE": "DASHED"
+                },
+                {
+                    "POLYGON": [
+                        1920,
+                        871,
+                        1417,
+                        703,
+                        1110,
+                        604
+                    ],
+                    "COLOR": "WHITE",
+                    "COUNT": "1",
+                    "CLASS": "LANE",
+                    "TYPE": "SOLID"
+                }
+            ],
+            "3D_LIST": [
+                {
+                    "BOX": [
+                        598,
+                        567,
+                        745,
+                        667
+                    ],
+                    "CLASS": "VEHICLE",
+                    "TYPE": "SEDAN",
+                    "ACCELERATION": "YES",
+                    "DIMENSION": [
+                        2.0,
+                        3.0,
+                        5.0
+                    ],
+                    "DISTANCE": 24.54,
+                    "INSTANCE_ID": 0,
+                    "LOCATION": [
+                        -23.3,
+                        -7.62,
+                        -0.87
+                    ],
+                    "YAW": 0.05
+                },
+                {
+                    "BOX": [
+                        764,
+                        491,
+                        919,
+                        655
+                    ],
+                    "CLASS": "VEHICLE",
+                    "TYPE": "TRUCK",
+                    "ACCELERATION": "YES",
+                    "DIMENSION": [
+                        3.5,
+                        3.0,
+                        5.96
+                    ],
+                    "DISTANCE": 25.5,
+                    "INSTANCE_ID": 1,
+                    "LOCATION": [
+                        -25.22,
+                        -3.75,
+                        -0.15
+                    ],
+                    "YAW": 0.0
+                },
+                {
+                    "BOX": [
+                        374,
+                        516,
+                        600,
+                        608
+                    ],
+                    "CLASS": "VEHICLE",
+                    "TYPE": "TRUCK",
+                    "ACCELERATION": "YES",
+                    "DIMENSION": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "DISTANCE": 0.0,
+                    "INSTANCE_ID": 0,
+                    "LOCATION": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "YAW": 0.0
+                }
+            ]
+        }
+    ]
+}

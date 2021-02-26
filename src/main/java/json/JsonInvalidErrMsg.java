@@ -9,6 +9,14 @@ public class JsonInvalidErrMsg {
         return this;
     }
 
+    public String getFileName() {
+        return fileName;
+    }
+
+    public String getErrMsg() {
+        return errMsg;
+    }
+
     public JsonInvalidErrMsg(String errMsg) {
         this.errMsg = errMsg;
     }
