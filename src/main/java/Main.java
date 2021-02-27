@@ -3,6 +3,7 @@ import json.JsonValidator;
 import json.Validator;
 import reader.JsonReader;
 import reader.Reader;
+import report.Writer;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +30,8 @@ public class Main {
         System.out.println("Validation Check Finished.");
 
         // file write
-
+        Writer writer = new Writer();
+        writer.write(report);
     }
 
     private static void printCurrentProgress(int currNum, String currFile, int totFiles) throws IOException {
